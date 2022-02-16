@@ -6,7 +6,7 @@ async function findAddresses(req: Request, res: Response, next: NextFunction) {
   const addresses = req.body;
 
   try {
-    await calcDistanceService.getAddresses(addresses);
+    await calcDistanceService.getDistances(addresses);
     res.sendStatus(200);
   } catch (error) {
     next(error);
