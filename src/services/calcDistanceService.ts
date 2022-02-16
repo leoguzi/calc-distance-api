@@ -2,22 +2,34 @@ const API_URL = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
 const API_KEY = process.env.GEOCODING_API_KEY;
 
 import Address from '../interfaces/Address';
-import AddressesDistance from '../interfaces/AddressesDistance';
+import AddressDistance from '../interfaces/AddressDistance';
 import Location from '../interfaces/Location';
 
 import axios from 'axios';
 import AddressNotFoundError from '../errors/AddressNotFound';
 
 async function getDistances(adresses: Address[]) {
-  let result = adresses.map(
+  let response = adresses.map(
     async (address) => await getAddressCoordinates(address)
   );
 
-  const addressesWithCoordinates = await Promise.all(result);
+  const addressesWithCoordinates = await Promise.all(response);
 
   const allDistances = getAllDistances(addressesWithCoordinates);
 
-  console.log(allDistances);
+  const interestDistances = findClosestAndFarthestAddress(allDistances);
+
+  const finalResult = {
+    closestAddresses: interestDistances.closest,
+    farthestAddresses: interestDistances.farthest,
+    otherDistances: allDistances.filter(
+      (distance) =>
+        distance !== interestDistances.closest &&
+        distance !== interestDistances.farthest
+    ),
+  };
+
+  return finalResult;
 }
 
 async function getAddressCoordinates(address: Address) {
@@ -56,14 +68,16 @@ function buildQuery(address: Address): string {
 }
 
 function getAllDistances(addresses: Address[]) {
-  const allDistances: AddressesDistance[] = [];
+  const allDistances: AddressDistance[] = [];
 
   for (let i = 0; i < addresses.length; i++) {
     for (let j = i + 1; j < addresses.length; j++) {
       allDistances.push({
         address1: addresses[i].formattedAddress,
         address2: addresses[j].formattedAddress,
-        distance: calcDistance(addresses[i].location, addresses[j].location),
+        distance: Number(
+          calcDistance(addresses[i].location, addresses[j].location).toFixed(2)
+        ),
       });
     }
   }
@@ -77,6 +91,26 @@ function calcDistance(address1: Location, address2: Location): number {
   const distanceInKm = distanceInDegrees * 111.12;
 
   return distanceInKm;
+}
+
+function findClosestAndFarthestAddress(allDistances: AddressDistance[]): {
+  closest: AddressDistance;
+  farthest: AddressDistance;
+} {
+  let closest = allDistances[0];
+  let farthest = allDistances[0];
+  for (let i = 1; i < allDistances.length; i++) {
+    if (allDistances[i].distance < closest.distance) {
+      closest = allDistances[i];
+    }
+    if (allDistances[i].distance > farthest.distance) {
+      farthest = allDistances[i];
+    }
+  }
+  return {
+    closest,
+    farthest,
+  };
 }
 
 export { getDistances };
