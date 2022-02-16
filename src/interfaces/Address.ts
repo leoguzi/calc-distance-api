@@ -1,8 +1,9 @@
 export default interface Address {
+  [key: string]: string;
   street: string;
-  number: number;
-  neighborhood: string;
-  city: string;
-  state: string;
-  zipCode: number;
+  number?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
 }
