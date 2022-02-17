@@ -3,7 +3,7 @@ import cors from 'cors';
 
 import errorHandlingMiddleware from './middlewares/errorHandlingMiddleware';
 
-import findAddressesRouter from './routers/calcDistanceRouter';
+import findAddressesRouter from './routers/calcDistancesRouter';
 
 const app = express();
 app.use(cors());

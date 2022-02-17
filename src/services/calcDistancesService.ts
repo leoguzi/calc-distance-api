@@ -8,8 +8,8 @@ import Location from '../interfaces/Location';
 import axios from 'axios';
 import AddressNotFoundError from '../errors/AddressNotFound';
 
-async function getDistances(adresses: Address[]) {
-  let response = adresses.map(
+async function getDistances(addresses: Address[]) {
+  let response = addresses.map(
     async (address) => await getAddressCoordinates(address)
   );
 
@@ -36,7 +36,6 @@ async function getAddressCoordinates(address: Address) {
   const querryString = buildQuery(address);
 
   const response = await axios.get(API_URL + querryString + '&key=' + API_KEY);
-
   if (!response.data.results[0]) {
     throw new AddressNotFoundError();
   }

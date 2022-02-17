@@ -19,7 +19,6 @@ export default function schemaValidatingMiddleware(
     if (validation.error) {
       throw new InvalidDataError('Body');
     }
-
     next();
   };
 }
