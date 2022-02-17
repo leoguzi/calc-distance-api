@@ -18,9 +18,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
 var express_1 = require("express");
 var findAddressesController = __importStar(require("../controllers/calcDistanceController"));
+var schemaValidatingMiddleware_1 = __importDefault(require("../middlewares/schemaValidatingMiddleware"));
+var addressesSchema_1 = __importDefault(require("../schemas/addressesSchema"));
 var findAddressesRouter = (0, express_1.Router)();
-findAddressesRouter.post('/addresses', findAddressesController.findAddresses);
+findAddressesRouter.post('/addresses', (0, schemaValidatingMiddleware_1["default"])(addressesSchema_1["default"]), findAddressesController.findAddresses);
 exports["default"] = findAddressesRouter;

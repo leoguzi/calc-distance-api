@@ -1,16 +1,11 @@
-const API_URL = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
-const API_KEY = process.env.GEOCODING_API_KEY;
-
 import Address from '../interfaces/Address';
 import AddressDistance from '../interfaces/AddressDistance';
 import Location from '../interfaces/Location';
-
-import axios from 'axios';
-import AddressNotFoundError from '../errors/AddressNotFound';
+import * as geocodingService from './geocodingService';
 
 async function getDistances(addresses: Address[]) {
   let response = addresses.map(
-    async (address) => await getAddressCoordinates(address)
+    async (address) => await geocodingService.getAddressCoordinates(address)
   );
 
   const addressesWithCoordinates = await Promise.all(response);
@@ -30,40 +25,6 @@ async function getDistances(addresses: Address[]) {
   };
 
   return finalResult;
-}
-
-async function getAddressCoordinates(address: Address) {
-  const querryString = buildQuery(address);
-
-  const response = await axios.get(API_URL + querryString + '&key=' + API_KEY);
-  if (!response.data.results[0]) {
-    throw new AddressNotFoundError();
-  }
-
-  const addressWithCoordinates = {
-    ...address,
-    formattedAddress: response.data.results[0].formatted_address,
-    location: response.data.results[0]?.geometry.location,
-  };
-
-  return addressWithCoordinates;
-}
-
-function buildQuery(address: Address): string {
-  let addressString: string = '';
-
-  for (let property in address) {
-    addressString += `,+${address[property]}`;
-  }
-
-  addressString = addressString.replace(',+', '');
-  addressString = addressString.replace(/ /g, '+');
-
-  addressString = addressString
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-
-  return addressString;
 }
 
 function getAllDistances(addresses: Address[]) {
