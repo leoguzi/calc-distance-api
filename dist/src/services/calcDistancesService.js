@@ -1,14 +1,22 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -46,15 +54,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 exports.__esModule = true;
 exports.getDistances = void 0;
-var API_URL = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
-var API_KEY = process.env.GEOCODING_API_KEY;
-var axios_1 = __importDefault(require("axios"));
-var AddressNotFound_1 = __importDefault(require("../errors/AddressNotFound"));
+var geocodingService = __importStar(require("./geocodingService"));
 function getDistances(addresses) {
     return __awaiter(this, void 0, void 0, function () {
         var response, addressesWithCoordinates, allDistances, interestDistances, finalResult;
@@ -64,7 +66,7 @@ function getDistances(addresses) {
                 case 0:
                     response = addresses.map(function (address) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
                         switch (_a.label) {
-                            case 0: return [4 /*yield*/, getAddressCoordinates(address)];
+                            case 0: return [4 /*yield*/, geocodingService.getAddressCoordinates(address)];
                             case 1: return [2 /*return*/, _a.sent()];
                         }
                     }); }); });
@@ -87,38 +89,6 @@ function getDistances(addresses) {
     });
 }
 exports.getDistances = getDistances;
-function getAddressCoordinates(address) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function () {
-        var querryString, response, addressWithCoordinates;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    querryString = buildQuery(address);
-                    return [4 /*yield*/, axios_1["default"].get(API_URL + querryString + '&key=' + API_KEY)];
-                case 1:
-                    response = _b.sent();
-                    if (!response.data.results[0]) {
-                        throw new AddressNotFound_1["default"]();
-                    }
-                    addressWithCoordinates = __assign(__assign({}, address), { formattedAddress: response.data.results[0].formatted_address, location: (_a = response.data.results[0]) === null || _a === void 0 ? void 0 : _a.geometry.location });
-                    return [2 /*return*/, addressWithCoordinates];
-            }
-        });
-    });
-}
-function buildQuery(address) {
-    var addressString = '';
-    for (var property in address) {
-        addressString += ",+".concat(address[property]);
-    }
-    addressString = addressString.replace(',+', '');
-    addressString = addressString.replace(/ /g, '+');
-    addressString = addressString
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
-    return addressString;
-}
 function getAllDistances(addresses) {
     var allDistances = [];
     for (var i = 0; i < addresses.length; i++) {
